@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import argparse
+import numpy as np
+from pprint import pprint
+
+parser = argparse.ArgumentParser(
+    prog='cross-vector',
+    description='Cross-Plane vector splitter'
+)
+parser.add_argument('-s', '--stepping', required=True,
+		    help='Stepping in lightyears')
+parser.add_argument('-S', '--start', required=True,
+		   help='Start coordinates in x:y')
+parser.add_argument('-E', '--end', required=True,
+		   help='Start coordinates in x:y')
+args = parser.parse_args()
+#pprint(args)
+
+def split(coord):
+    a,b = coord.split(':')
+    return np.array([int(a), int(b)], dtype=np.int64)
+    pass
+
+start = split(args.start)
+end = split(args.end)
+
+# normalize:
+norm = end - start
+l = np.linalg.norm(norm)
+
+nsteps = l/int(args.stepping)
+
+# and we need a round number of steps
+nsteps = np.round(nsteps)
+stepping = l/nsteps
+onestep = norm / nsteps
+
+
+for i in range(0, int(nsteps)+1):
+    step = start + i * onestep
+    print('{i} X:{x} Y:{y}'.format(i=i, x=int(step[0]), y=int(step[1])))
+    pass
+
