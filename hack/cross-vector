@@ -37,8 +37,10 @@ stepping = l/nsteps
 onestep = norm / nsteps
 
 
+print('X,Y,CMDR')
 for i in range(0, int(nsteps)+1):
     step = start + i * onestep
-    print('{i} X:{x} Y:{y}'.format(i=i, x=int(step[0]), y=int(step[1])))
+    #print('{i} X:{x} Y:{y}'.format(i=i, x=int(step[0]), y=int(step[1])))
+    print('{x},{y},'.format(x=int(step[0]), y=int(step[1])))
     pass
 
