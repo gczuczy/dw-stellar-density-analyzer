@@ -16,7 +16,7 @@ type EntrySheet struct {
 func NewEntrySheet(sheetid string, ss *google.GSpreadsheetsService) (*EntrySheet, error) {
 	s, err := ss.Sheet(sheetid)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
+		fmt.Printf("NewEntrySheet err: %v\n", err)
 		return nil, errors.Join(err, fmt.Errorf("Unable to load sheet %s", sheetid))
 	}
 
@@ -31,7 +31,7 @@ func (es *EntrySheet) GetSheetIDs() ([]string, error) {
 
 	sheetname := es.spreadsheet.GetSheets()[0].Properties.Title
 
-	step := 100
+	step := 1024
 	pos := 1
 	cont := true
 

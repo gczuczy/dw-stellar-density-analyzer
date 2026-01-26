@@ -2,6 +2,8 @@ package google
 
 import (
 	"fmt"
+	"time"
+	"errors"
 	"context"
 	"google.golang.org/api/sheets/v4"
 	"golang.org/x/oauth2"
@@ -54,7 +56,15 @@ func (s *GSpreadsheet) GetSheets() []*sheets.Sheet {
 	return s.Sheet.Sheets
 }
 
-func (s *GSpreadsheet) ReadRange(sheet string, start string, end string) (*sheets.ValueRange, error) {
+func (s *GSpreadsheet) ReadRange(sheet string, start string, end string) (ret *sheets.ValueRange, err error) {
 	rangestr := fmt.Sprintf("%s!%s:%s", sheet, start, end)
-	return s.SheetsService.Spreadsheets.Values.Get(s.ID, rangestr).Do()
+	f := func() (*sheets.ValueRange, error) {
+		return s.SheetsService.Spreadsheets.Values.Get(s.ID, rangestr).Do()
+	}
+	ret, err = RateLimit(f, 30*time.Second)
+	if err != nil {
+		fmt.Printf("ReadCell error: %T/%v", err, err)
+		err = errors.Join(err, fmt.Errorf("ReadCell(%s!%s:%s)", sheet, start, end))
+	}
+	return ret, err
 }

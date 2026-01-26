@@ -37,5 +37,21 @@ func Run() {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	fmt.Printf("SheetIDs: %v\n", ids)
+
+	for _, sheetid := range ids {
+		fmt.Printf("SheetID: %s\n", sheetid)
+		dss, err := ds.NewDensitySpreadsheet(sheetid, ss)
+		if err != nil {
+			fmt.Printf("Error in sheet %s: %v\n", sheetid, err)
+			continue
+		}
+
+		ms, err := dss.GetMeasurements()
+		if err != nil {
+			fmt.Printf("Measurement error in sheet %s: %v\n", sheetid, err)
+			continue
+		}
+		fmt.Printf("Measurements in %s: %d\n", sheetid, len(ms))
+		fmt.Printf("M: %+v\n", ms)
+	}
 }
