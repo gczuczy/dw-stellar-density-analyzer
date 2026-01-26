@@ -12,7 +12,7 @@ func RateLimit[T any](f func()(T, error), wait time.Duration) (T, error) {
 
 		if err != nil {
 			if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 429 {
-				fmt.Printf("Rate limited, Sleeping 30 secs")
+				fmt.Printf("Rate limited, Sleeping 30 secs\n")
 				time.Sleep(wait)
 				continue
 			}
