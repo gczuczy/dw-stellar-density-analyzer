@@ -2,7 +2,7 @@ package cli
 
 import (
 	"os"
-	"fmt"
+	//	"fmt"
 
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/koanf/providers/posflag"
@@ -18,7 +18,7 @@ func parseArgs(k *koanf.Koanf) error {
 	}
 
 	f.StringP("sa-creds", "s", "credentials.json", "The Google Service Account credentials json")
-	f.StringP("sheetid", "i", "", "The ID of the entrypoint google sheet")
+	f.StringP("sheetid", "i", "", "The ID of the entrypoint google sheet (one sheet per A column, either link or ID)")
 	if err := f.Parse(os.Args[1:]); err != nil {
 		return err
 	}
