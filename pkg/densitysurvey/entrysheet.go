@@ -13,12 +13,7 @@ type EntrySheet struct {
 	spreadsheet *google.GSpreadsheet
 }
 
-func NewEntrySheet(sheetid string, creds string) (*EntrySheet, error) {
-	ss, err := google.NewSheets(creds)
-	if err != nil {
-		return nil, errors.Join(err, fmt.Errorf("Credentials error: %s", creds))
-	}
-
+func NewEntrySheet(sheetid string, ss *google.GSpreadsheetsService) (*EntrySheet, error) {
 	s, err := ss.Sheet(sheetid)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
