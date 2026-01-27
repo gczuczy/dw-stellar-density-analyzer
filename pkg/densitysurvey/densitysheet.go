@@ -57,7 +57,7 @@ func (ds *DensitySpreadsheet) GetMeasurements() ([]Measurement, error) {
 func (ds *DensitySpreadsheet) parseSheet(name string) (Measurement, error) {
 	m := Measurement{
 		Name: name,
-		DataPoints: make([]DataPoint, 10),
+		DataPoints: make([]DataPoint, 0, 32),
 	}
 
 	endcell := fmt.Sprintf("I%d", MaxSamples)
