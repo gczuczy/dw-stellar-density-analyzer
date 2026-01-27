@@ -5,6 +5,7 @@ import (
 	"time"
 	"errors"
 	"strings"
+	"strconv"
 
 	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/google"
 )
@@ -52,7 +53,10 @@ func (ds *DensitySpreadsheet) GetMeasurements() ([]Measurement, error) {
 }
 
 func (ds *DensitySpreadsheet) parseSheet(name string) (Measurement, error) {
-	m := Measurement{}
+	m := Measurement{
+		Name: name,
+		DataPoints: make([]DataPoint, 10),
+	}
 
 	endcell := fmt.Sprintf("H%d", MaxSamples)
 
@@ -65,6 +69,38 @@ func (ds *DensitySpreadsheet) parseSheet(name string) (Measurement, error) {
 	if len(parts) == 2 {
 		m.CMDR = parts[0]
 		m.Project = parts[1]
+	}
+
+	defint := func(in any) int {
+		if x, err := strconv.Atoi(in.(string)); err == nil {
+			return x
+		}
+		fmt.Printf("Can't int: %v\n", in)
+		return 0
+	}
+	deffloat := func(in any) float32 {
+		if x, err := strconv.ParseFloat(in.(string), 32); err == nil {
+			return float32(x)
+		}
+		fmt.Printf("Can't float: %v\n", in)
+		return 0
+	}
+
+	for i, row := range data.Values {
+		// headers and stuff
+		if i <5 {
+			continue
+		}
+		if len(row)<4 {
+			break
+		}
+		dp := DataPoint{
+			SystemName: row[0].(string),
+			ZSample: defint(row[1]),
+			Count: defint(row[2]),
+			MaxDistance: deffloat(row[3]),
+		}
+		m.DataPoints = append(m.DataPoints, dp)
 	}
 
 	return m, nil

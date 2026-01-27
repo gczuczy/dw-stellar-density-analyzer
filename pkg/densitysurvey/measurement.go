@@ -15,6 +15,7 @@ type DataPoint struct {
 	Y int
 	Z int
 	SystemName string
+	ZSample int
 	Count int
 	MaxDistance float32
 }
