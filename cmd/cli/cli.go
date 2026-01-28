@@ -51,6 +51,11 @@ func Run() {
 			fmt.Printf("Measurement error in sheet %s: %v\n", sheetid, err)
 			continue
 		}
+		for _, m := range ms {
+			if err = m.LookupNames(); err != nil {
+				fmt.Printf(" !! Lookupnames failed: %v\n", err)
+			}
+		}
 		fmt.Printf("Measurements in %s: %d\n", sheetid, len(ms))
 		fmt.Printf("M: %+v\n", ms)
 	}
