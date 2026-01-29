@@ -19,6 +19,7 @@ func parseArgs(k *koanf.Koanf) error {
 
 	f.StringP("sa-creds", "s", "credentials.json", "The Google Service Account credentials json")
 	f.StringP("sheetid", "i", "", "The ID of the entrypoint google sheet (one sheet per A column, either link or ID)")
+	f.StringP("config", "c", "~/.edsda.yaml", "Path to the configuration file")
 	if err := f.Parse(os.Args[1:]); err != nil {
 		return err
 	}

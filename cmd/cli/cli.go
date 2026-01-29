@@ -6,15 +6,28 @@ import (
 	"github.com/knadh/koanf/v2"
 
 	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/google"
+	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
+	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/db"
 	ds "github.com/gczuczy/dw-stellar-density-analyzer/pkg/densitysurvey"
 )
 
 func Run() {
+	var cfg *config.Config
 
 	k := koanf.New(".")
 
 	err := parseArgs(k)
 	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		os.Exit(1)
+	}
+
+	if cfg, err = config.ParseConfig(k); err != nil {
+		fmt.Printf("err: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err = db.Init(&cfg.DB); err != nil {
 		fmt.Printf("err: %v\n", err)
 		os.Exit(1)
 	}
@@ -56,7 +69,13 @@ func Run() {
 				fmt.Printf(" !! Lookupnames failed: %v\n", err)
 			}
 		}
-		fmt.Printf("Measurements in %s: %d\n", sheetid, len(ms))
-		fmt.Printf("M: %+v\n", ms)
+		//fmt.Printf("Measurements in %s: %d\n", sheetid, len(ms))
+		//fmt.Printf("M: %+v\n", ms)
+
+		for _, m := range ms {
+			if err = db.Pool.AddMeasurement(&m); err != nil {
+				fmt.Printf("AddMeasurement: %v\n", err)
+			}
+		}
 	}
 }

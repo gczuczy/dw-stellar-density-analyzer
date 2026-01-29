@@ -12,7 +12,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON density.projects TO edservice;
 GRANT SELECT ON density.projects TO edviewer;
 INSERT INTO density.projects (name) VALUES
 ('A15X CW Density Scans'),
-('DW3 Stellar Density'),
+('DW3 Stellar Density Scans'),
 ('DW3 Logarithmic Density Scans')
 ;
 
@@ -21,7 +21,7 @@ CREATE TABLE density.cmdrs (
        name  varchar(64)	  NOT NULL UNIQUE,
        PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE, DELETE ON density.cmdrs TO edservice;
+GRANT SELECT, INSERT, UPDATE ON density.cmdrs TO edservice;
 GRANT SELECT ON density.cmdrs TO edviewer;
 
 CREATE TABLE density.measurements (
@@ -32,12 +32,14 @@ CREATE TABLE density.measurements (
        FOREIGN KEY (cmdrid) REFERENCES density.cmdrs(id),
        PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE, DELETE ON density.measurements TO edservice;
+GRANT SELECT, INSERT ON density.measurements TO edservice;
 GRANT SELECT ON density.measurements TO edviewer;
 
 CREATE TABLE density.datapoints (
        id    int		  GENERATED ALWAYS AS IDENTITY,
        measurementid int	  NOT NULL,
+       sysname	     varchar(64)  NOT NULL,
+       zsample	     int	  NOT NULL,
        x	     real	  NOT NULL,
        y	     real	  NOT NULL,
        z	     real	  NOT NULL,
@@ -45,8 +47,10 @@ CREATE TABLE density.datapoints (
        maxdistance   real	  NOT NULL,
        FOREIGN KEY (measurementid) REFERENCES density.measurements(id),
        PRIMARY KEY (id),
+       UNIQUE (measurementid, zsample),
+       UNIQUE (measurementid, sysname),
        CHECK (syscount >= 0 AND syscount <= 50),
        CHECK (maxdistance > 0 AND maxdistance <= 20)
 );
-GRANT SELECT, INSERT, UPDATE, DELETE ON density.datapoints TO edservice;
+GRANT SELECT, INSERT ON density.datapoints TO edservice;
 GRANT SELECT ON density.datapoints TO edviewer;
