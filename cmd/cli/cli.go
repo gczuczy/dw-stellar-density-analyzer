@@ -74,7 +74,7 @@ func Run() {
 
 		for _, m := range ms {
 			if err = db.Pool.AddSurvey(&m); err != nil {
-				fmt.Printf("AddMeasurement: %v\n", err)
+				fmt.Printf("AddMeasurement (%s): %v\n%+v\n\n", sheetid, err, m)
 			}
 		}
 	}
