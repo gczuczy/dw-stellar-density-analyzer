@@ -25,7 +25,7 @@ var (
 		SampleIndicatorColumn: 1,
 		SysNameColumn: 0,
 		ZSampleColumn: 1,
-		SystemCountColumn: 2,
+		SystemCountColumn: 3,
 		MaxDistanceColumn: 4,
 		XColumn: 6,
 		ZColumn: 7,
