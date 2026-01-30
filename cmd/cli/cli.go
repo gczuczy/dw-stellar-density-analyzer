@@ -59,7 +59,7 @@ func Run() {
 			continue
 		}
 
-		ms, err := dss.GetMeasurements()
+		ms, err := dss.GetSurveys()
 		if err != nil {
 			fmt.Printf("Measurement error in sheet %s: %v\n", sheetid, err)
 			continue
@@ -73,7 +73,7 @@ func Run() {
 		//fmt.Printf("M: %+v\n", ms)
 
 		for _, m := range ms {
-			if err = db.Pool.AddMeasurement(&m); err != nil {
+			if err = db.Pool.AddSurvey(&m); err != nil {
 				fmt.Printf("AddMeasurement: %v\n", err)
 			}
 		}

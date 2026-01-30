@@ -38,9 +38,9 @@ func NewDensitySpreadsheet(sheetid string, ss *google.GSpreadsheetsService) (*De
 	}, nil
 }
 
-func (ds *DensitySpreadsheet) GetMeasurements() ([]Measurement, error) {
+func (ds *DensitySpreadsheet) GetSurveys() ([]Survey, error) {
 	var reterr error = nil
-	ret := []Measurement{}
+	ret := []Survey{}
 
 	for _, sheet := range ds.spreadsheet.GetSheets() {
 		if m, err := ds.parseSheet(sheet.Properties.Title); err != nil {
@@ -54,10 +54,10 @@ func (ds *DensitySpreadsheet) GetMeasurements() ([]Measurement, error) {
 	return ret, reterr
 }
 
-func (ds *DensitySpreadsheet) parseSheet(name string) (Measurement, error) {
-	m := Measurement{
+func (ds *DensitySpreadsheet) parseSheet(name string) (Survey, error) {
+	m := Survey{
 		Name: name,
-		DataPoints: make([]DataPoint, 0, 32),
+		SurveyPoints: make([]SurveyPoint, 0, 32),
 	}
 
 	endcell := fmt.Sprintf("I%d", MaxSamples)
@@ -124,13 +124,13 @@ func (ds *DensitySpreadsheet) parseSheet(name string) (Measurement, error) {
 				i, variant.MaxDistanceColumn,
 				row[variant.MaxDistanceColumn], ds.spreadsheet.ID, name))
 		}
-		dp := DataPoint{
+		dp := SurveyPoint{
 			SystemName: row[variant.SysNameColumn].(string),
 			ZSample: z,
 			Count: c,
 			MaxDistance: float32(md),
 		}
-		m.DataPoints = append(m.DataPoints, dp)
+		m.SurveyPoints = append(m.SurveyPoints, dp)
 	}
 
 	return m, nil

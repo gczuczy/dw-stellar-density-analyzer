@@ -18,12 +18,12 @@ var (
 	Pool *DBPool=nil
 
 	prepared = map[string]string{
-		"addsheetmeasurement": `
-SELECT density.addsheetmeasurement($1::text, $2::text)
+		"addsheetsurvey": `
+SELECT density.addsheetsurvey($1::text, $2::text)
 `,
-		// measurementid, sysname, x,y,z, syscount, maxdistance
-		"adddatapoint": `
-INSERT INTO density.datapoints (measurementid, sysname, zsample, x,y,z, syscount, maxdistance)
+		// surveyid, sysname, x,y,z, syscount, maxdistance
+		"addsurveypoint": `
+INSERT INTO density.surveypoints (surveyid, sysname, zsample, x,y,z, syscount, maxdistance)
 VALUES ($1::int, $2::text, $3::int, $4::real, $5::real, $6::real, $7::int, $8::real)
 `,
 	}
@@ -82,7 +82,7 @@ func afterConn(ctx context.Context, dbc *pgx.Conn) error {
 	return nil
 }
 
-func (p *DBPool) AddMeasurement(m *ds.Measurement) (err error) {
+func (p *DBPool) AddSurvey(m *ds.Survey) (err error) {
 	conn, err := p.pool.Acquire(p.ctx)
 	if err != nil {
 		return err
@@ -104,12 +104,12 @@ func (p *DBPool) AddMeasurement(m *ds.Measurement) (err error) {
 
 	var rows pgx.Rows
 
-	if rows, err = tx.Query(p.ctx, "addsheetmeasurement",	m.CMDR, m.Project);  err != nil {
+	if rows, err = tx.Query(p.ctx, "addsheetsurvey",	m.CMDR, m.Project);  err != nil {
 		return err
 	}
 
 	if !rows.Next() {
-		return fmt.Errorf("No measurementid returned")
+		return fmt.Errorf("No surveyid returned")
 	}
 
 	var vs []any
@@ -124,10 +124,10 @@ func (p *DBPool) AddMeasurement(m *ds.Measurement) (err error) {
 	}
 	rows.Close()
 
-	for _, dp := range m.DataPoints {
-		if _, err = tx.Exec(p.ctx, "adddatapoint", mid, dp.SystemName, dp.ZSample,
+	for _, dp := range m.SurveyPoints {
+		if _, err = tx.Exec(p.ctx, "addsurveypoint", mid, dp.SystemName, dp.ZSample,
 			dp.X, dp.Y, dp.Z, dp.Count, dp.MaxDistance); err != nil {
-			return errors.Join(err, fmt.Errorf("Error while inserting datapoint"))
+			return errors.Join(err, fmt.Errorf("Error while inserting surveypoint"))
 		}
 	}
 

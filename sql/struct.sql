@@ -3,14 +3,14 @@ DROP SCHEMA IF EXISTS density CASCADE;
 CREATE SCHEMA density;
 GRANT USAGE ON SCHEMA density TO edadmin, edservice, edviewer;
 
-CREATE TABLE density.projects (
+CREATE TABLE density.campaigns (
        id int GENERATED ALWAYS AS IDENTITY,
        name varchar(64) NOT NULL,
        PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE, DELETE ON density.projects TO edservice;
-GRANT SELECT ON density.projects TO edviewer;
-INSERT INTO density.projects (name) VALUES
+GRANT SELECT, INSERT, UPDATE, DELETE ON density.campaigns TO edservice;
+GRANT SELECT ON density.campaigns TO edviewer;
+INSERT INTO density.campaigns (name) VALUES
 ('A15X CW Density Scans'),
 ('DW3 Stellar Density Scans'),
 ('DW3 Logarithmic Density Scans')
@@ -24,20 +24,20 @@ CREATE TABLE density.cmdrs (
 GRANT SELECT, INSERT, UPDATE ON density.cmdrs TO edservice;
 GRANT SELECT ON density.cmdrs TO edviewer;
 
-CREATE TABLE density.measurements (
+CREATE TABLE density.surveys (
        id    int		  GENERATED ALWAYS AS IDENTITY,
-       projectid int		  NOT NULL,
+       campaignid int		  NOT NULL,
        cmdrid	 int		  NOT NULL,
-       FOREIGN KEY (projectid) REFERENCES density.projects (id),
+       FOREIGN KEY (campaignid) REFERENCES density.campaigns (id),
        FOREIGN KEY (cmdrid) REFERENCES density.cmdrs(id),
        PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT ON density.measurements TO edservice;
-GRANT SELECT ON density.measurements TO edviewer;
+GRANT SELECT, INSERT ON density.surveys TO edservice;
+GRANT SELECT ON density.surveys TO edviewer;
 
-CREATE TABLE density.datapoints (
+CREATE TABLE density.surveypoints (
        id    int		  GENERATED ALWAYS AS IDENTITY,
-       measurementid int	  NOT NULL,
+       surveyid int	  NOT NULL,
        sysname	     varchar(64)  NOT NULL,
        zsample	     int	  NOT NULL,
        x	     real	  NOT NULL,
@@ -45,12 +45,12 @@ CREATE TABLE density.datapoints (
        z	     real	  NOT NULL,
        syscount	     int	  NOT NULL,
        maxdistance   real	  NOT NULL,
-       FOREIGN KEY (measurementid) REFERENCES density.measurements(id),
+       FOREIGN KEY (surveyid) REFERENCES density.surveys(id),
        PRIMARY KEY (id),
-       UNIQUE (measurementid, zsample),
-       UNIQUE (measurementid, sysname),
+       UNIQUE (surveyid, zsample),
+       UNIQUE (surveyid, sysname),
        CHECK (syscount >= 0 AND syscount <= 50),
        CHECK (maxdistance > 0 AND maxdistance <= 20)
 );
-GRANT SELECT, INSERT ON density.datapoints TO edservice;
-GRANT SELECT ON density.datapoints TO edviewer;
+GRANT SELECT, INSERT ON density.surveypoints TO edservice;
+GRANT SELECT ON density.surveypoints TO edviewer;

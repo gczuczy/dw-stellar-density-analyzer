@@ -1,8 +1,8 @@
 
-CREATE OR REPLACE FUNCTION density.addsheetmeasurement(cmdr text, project text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION density.addsheetsurvey(cmdr text, campaign text) RETURNS int AS $$
 DECLARE
 	cmdrid int;
-	projectid int;
+	campaignid int;
 	mid int;
 BEGIN
    SELECT INTO cmdrid id FROM density.cmdrs WHERE name = cmdr;
@@ -10,17 +10,17 @@ BEGIN
       INSERT INTO density.cmdrs (name) VALUES (cmdr) RETURNING id INTO cmdrid;
    END IF;
 
-   SELECT INTO projectid id FROM density.projects WHERE name = project;
+   SELECT INTO campaignid id FROM density.campaigns WHERE name = campaign;
    IF NOT FOUND THEN
-      INSERT INTO density.projects (name) VALUES (project)
-      RETURNING id INTO projectid;
+      INSERT INTO density.campaigns (name) VALUES (campaign)
+      RETURNING id INTO campaignid;
    END IF;
 
-   INSERT INTO density.measurements (cmdrid, projectid) VALUES (cmdrid, projectid)
+   INSERT INTO density.surveys (cmdrid, campaignid) VALUES (cmdrid, campaignid)
    RETURNING id INTO mid;
 
    RETURN mid;
 END;
 $$ LANGUAGE plpgsql VOLATILE STRICT PARALLEL UNSAFE SECURITY INVOKER;
 
-GRANT EXECUTE ON FUNCTION density.addsheetmeasurement(cmdr text, project text) TO edservice;
+GRANT EXECUTE ON FUNCTION density.addsheetsurvey(cmdr text, campaign text) TO edservice;

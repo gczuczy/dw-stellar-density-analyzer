@@ -9,14 +9,14 @@ var (
 	edsms *edsm.EDSM
 )
 
-type Measurement struct {
+type Survey struct {
 	CMDR string
 	Project string
 	Name string
-	DataPoints []DataPoint
+	SurveyPoints []SurveyPoint
 }
 
-type DataPoint struct {
+type SurveyPoint struct {
 	X float32
 	Y float32
 	Z float32
@@ -26,14 +26,14 @@ type DataPoint struct {
 	MaxDistance float32
 }
 
-func (m *Measurement) LookupNames() error {
+func (m *Survey) LookupNames() error {
 
 	if edsms == nil {
 		edsms = edsm.New()
 	}
 
-	names := make([]string, 0, len(m.DataPoints))
-	for _, dp := range m.DataPoints {
+	names := make([]string, 0, len(m.SurveyPoints))
+	for _, dp := range m.SurveyPoints {
 		names = append(names, dp.SystemName)
 	}
 
@@ -43,12 +43,12 @@ func (m *Measurement) LookupNames() error {
 	}
 
 	// and correlate names
-	for i, dp := range m.DataPoints {
+	for i, dp := range m.SurveyPoints {
 		for _, sys := range lookupres {
 			if sys.Name == dp.SystemName {
-				m.DataPoints[i].X = sys.Coords.X
-				m.DataPoints[i].Y = sys.Coords.Z
-				m.DataPoints[i].Z = sys.Coords.Y
+				m.SurveyPoints[i].X = sys.Coords.X
+				m.SurveyPoints[i].Y = sys.Coords.Z
+				m.SurveyPoints[i].Z = sys.Coords.Y
 				break
 			}
 		}
