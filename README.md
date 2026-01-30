@@ -2,6 +2,8 @@
 
 ## Getting started with CLI
 
+To build the tool run `gmake build`.
+
 Running the cli needs 3 things:
 
  1. A google serviceaccount, please see notes. Extract the service account's credentials.json, that's one of the required args
