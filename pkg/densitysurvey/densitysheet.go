@@ -76,7 +76,6 @@ func (ds *DensitySpreadsheet) parseSheet(name string) (Survey, error) {
 	// identify the sheet type
 	var variant *sheetVariant = nil
 	for _, sv := range sheetVariants {
-		//fmt.Printf("Evaluating %s/%s VS %s\n", ds.spreadsheet.ID, name, sv.Name)
 		if evalSheetVariant(sv, data) {
 			variant = sv
 			break
@@ -104,12 +103,16 @@ func (ds *DensitySpreadsheet) parseSheet(name string) (Survey, error) {
 		}
 
 		if z, err = strconv.Atoi(row[variant.ZSampleColumn].(string)); err != nil {
-			return m, errors.Join(err, fmt.Errorf("Conversion ZSample error '%v': %s/%s",
-				row[variant.ZSampleColumn], ds.spreadsheet.ID, name))
+			// skip
+			continue
+			//return m, errors.Join(err, fmt.Errorf("Conversion ZSample error '%v': %s/%s",
+			//row[variant.ZSampleColumn], ds.spreadsheet.ID, name))
 		}
 		if c, err = strconv.Atoi(row[variant.SystemCountColumn].(string)); err != nil {
-			return m, errors.Join(err, fmt.Errorf("Conversion SysCnt error '%v': %s/%s",
-				row[variant.SystemCountColumn], ds.spreadsheet.ID, name))
+			// skip
+			continue
+			//return m, errors.Join(err, fmt.Errorf("Conversion SysCnt error '%v': %s/%s",
+			//	row[variant.SystemCountColumn], ds.spreadsheet.ID, name))
 		}
 		//fmt.Printf("%s/%s/r%d: %+v\n", ds.spreadsheet.ID, name, i, row)
 		if len(row) <= variant.MaxDistanceColumn {
@@ -157,6 +160,8 @@ func evalSheetVariant(sv *sheetVariant, data *sheets.ValueRange) bool {
 	}
 
 	// check data validity, system names should be filled in the Z Sample col
+	nsamples := 0
+	nzsamples := 0
 	for i := sv.HeaderRow+1; i < len(data.Values); i+=1 {
 		var (
 			zstr, sysstr string
@@ -165,13 +170,31 @@ func evalSheetVariant(sv *sheetVariant, data *sheets.ValueRange) bool {
 		row := data.Values[i]
 		// if no sample defined, then we're done
 		if zstr, ok = row[sv.ZSampleColumn].(string); !ok || len(zstr)==0 {
-			return true
+			break
 		}
+		nzsamples += 1
+
+		hasSysName := false
+		hasSysCount := false
+		hasMaxDistance := false
 
 		// we have a ZSample defined, check sysname
-		if sysstr, ok = row[sv.SysNameColumn].(string); !ok || len(sysstr)==0 {
-			return false
+		if sysstr, ok = row[sv.SysNameColumn].(string); ok && len(sysstr)>=0 {
+			hasSysName = true
+		}
+		if syscount, err := strconv.Atoi(row[sv.SystemCountColumn].(string)); err == nil &&
+			syscount >= 0 && syscount < 50 {
+			hasSysCount = true
+		}
+		if len(row) > sv.MaxDistanceColumn {
+			if maxdst, err := strconv.ParseFloat(row[sv.MaxDistanceColumn].(string), 32); err == nil && maxdst >= 0 && maxdst <= 20 {
+				hasMaxDistance = true
+			}
+		}
+
+		if hasSysName && ( hasSysCount || hasMaxDistance ) {
+			nsamples += 1
 		}
 	}
-	return true
+	return float32(nzsamples) * sv.MinSampleRatio < float32(nsamples)
 }

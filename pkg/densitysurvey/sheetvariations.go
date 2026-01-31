@@ -25,11 +25,12 @@ var (
 		SampleIndicatorColumn: 1,
 		SysNameColumn: 0,
 		ZSampleColumn: 1,
-		SystemCountColumn: 3,
+		SystemCountColumn: 2,
 		MaxDistanceColumn: 4,
 		XColumn: 6,
 		ZColumn: 7,
 		YColumn: 8,
+		MinSampleRatio: 0.45,
 	}
 
 	variantA15X = sheetVariant{
@@ -58,10 +59,40 @@ var (
 		XColumn: 5,
 		ZColumn: 6,
 		YColumn: 7,
+		MinSampleRatio: 0.9,
+	}
+
+	variantA15Xv1 = sheetVariant{
+		Name: "A15X",
+		HeaderRow: 5,
+		HeaderChecks: []sheetHeaderCheck{
+			sheetHeaderCheck{
+				Column: 0,
+				Row: 5,
+				Value: "System",
+			},
+			sheetHeaderCheck{
+				Column: 2,
+				Row: 5,
+				Value: "n",
+			},
+			sheetHeaderCheck{5, 5, "X"},
+			sheetHeaderCheck{6, 5, "Z"},
+			sheetHeaderCheck{7, 5, "Y"},
+		},
+		SampleIndicatorColumn: 1,
+		SysNameColumn: 0,
+		ZSampleColumn: 1,
+		SystemCountColumn: 2,
+		MaxDistanceColumn: 3,
+		XColumn: 5,
+		ZColumn: 6,
+		YColumn: 7,
+		MinSampleRatio: 0.9,
 	}
 
 	sheetVariants = []*sheetVariant{
-		&variantDW3, &variantA15X,
+		&variantDW3, &variantA15X, &variantA15Xv1,
 	}
 )
 
@@ -84,6 +115,8 @@ type sheetVariant struct {
 	XColumn int
 	ZColumn int
 	YColumn int
+	// 0..1, minimum ratio of samples filled in the survey sheet
+	MinSampleRatio float32
 }
 
 // Column and Rows are on the 0-indexed result set, not cell designations

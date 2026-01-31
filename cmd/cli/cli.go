@@ -71,6 +71,7 @@ func Run() {
 		}
 		//fmt.Printf("Measurements in %s: %d\n", sheetid, len(ms))
 		//fmt.Printf("M: %+v\n", ms)
+		//os.Exit(0)
 
 		for _, m := range ms {
 			if err = db.Pool.AddSurvey(&m); err != nil {
