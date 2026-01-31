@@ -32,3 +32,8 @@ go.work.sum
 # .vscode/
 *~
 \#*
+
+# binaries
+dw-stellar-density-analyzer
+
+sql/q.sql
