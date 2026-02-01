@@ -3,12 +3,15 @@ package sdaservice
 import (
 	"os"
 	"fmt"
+	"syscall"
+	"os/signal"
 
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/koanf/providers/posflag"
 	flag "github.com/spf13/pflag"
 
 	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
+	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http"
 	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/db"
 )
 
@@ -29,25 +32,49 @@ func parseArgs(k *koanf.Koanf) error {
 }
 
 func Run() {
-	var cfg *config.Config
+	var (
+		cfg *config.Config
+		hs *http.HTTPService
+	)
 
 	k := koanf.New(".")
 	k.Print()
 
 	err := parseArgs(k)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
+		fmt.Fprintf(os.Stderr, "err: %v\n", err)
 		os.Exit(1)
 	}
 
 	if cfg, err = config.ParseConfig(k); err != nil {
-		fmt.Printf("err: %v\n", err)
+		fmt.Fprintf(os.Stderr, "err: %v\n", err)
 		os.Exit(1)
 	}
 
 	if err = db.Init(&cfg.DB); err != nil {
-		fmt.Printf("err: %v\n", err)
+		fmt.Fprintf(os.Stderr, "err: %v\n", err)
 		os.Exit(1)
 	}
 	defer db.Pool.Close()
+
+	if hs, err = http.New(&cfg.HTTP); err != nil {
+		fmt.Fprintf(os.Stderr, "err: %v\n", err)
+		os.Exit(1)
+	}
+	defer hs.Close()
+
+	if err = hs.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "err: %v\n", err)
+		os.Exit(1)
+	}
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	sig := <-sigChan
+	fmt.Printf("Received %s, bailing out\n", sig)
+	if err = hs.Shutdown(); err != nil {
+		fmt.Fprintf(os.Stderr, "err: %v\n", err)
+		os.Exit(1)
+	}
 }
