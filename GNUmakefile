@@ -1,4 +1,6 @@
 DISTDIR=${CURDIR}/dist
+SPABALL=pkg/http/webroot.tar
+SPADIR=${CURDIR}/webroot
 
 $(DISTDIR):
 	mkdir -p $@
@@ -16,5 +18,11 @@ $(DISTDIR)/sdsheetscraper: $(DISTDIR) go.mod $(shell find ./ -type f -name '*.go
 build: $(DISTDIR)/sdaservice
 	@echo "built stuff"
 
-$(DISTDIR)/sdaservice: go.mod $(shell find ./ -type f -name '*.go') | $(DISTDIR)
+$(DISTDIR)/sdaservice: go.mod $(SPABALL) $(shell find ./ -type f -name '*.go') | $(DISTDIR)
 	CGO_ENABLED=0 go build -o $@  .
+
+.PHONY: frontend
+frontend: $(SPABALL)
+
+$(SPABALL): $(shell find $(SPADIR)/ -type f)
+	tar -C $(SPADIR)/ -cvf $@ .

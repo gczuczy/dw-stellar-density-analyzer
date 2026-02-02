@@ -38,3 +38,6 @@ dist
 
 # sql workfiles
 sql/q.sql
+
+# embedded webroot
+pkg/http/webroot.tar
