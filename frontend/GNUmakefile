@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# GNUmakefile – Angular OAuth2 SPA
+# GNUmakefile – Stellar Density Analyzer
 #
 # Targets
 #   devserver   – install deps (if needed) and start the Angular dev server
@@ -24,7 +24,7 @@ node_modules: package.json
 	$(NPM) install
 
 # ── build ────────────────────────────────────────────────────────────────────
-# Production AOT build.  Output lands in ./dist/angular-oauth2-spa/browser/
+# Production AOT build.  Output lands in ./dist/stellar-density-analyzer/browser/
 build: node_modules
 	$(NG) build --configuration production
 

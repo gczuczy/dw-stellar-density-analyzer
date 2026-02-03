@@ -16,7 +16,7 @@ import { AuthService }                    from '../../auth/auth.service';
     <div class="container-fluid">
 
       <!-- ── Brand ───────────────────────────────────────────────────── -->
-      <a class="navbar-brand" routerLink="/">MySPA</a>
+      <a class="navbar-brand" routerLink="/">Stellar Density Analyzer</a>
 
       <!-- ── Toggler (mobile) ────────────────────────────────────────── -->
       <button class="navbar-toggler" type="button"

@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
         <div class="card p-4">
           <h1 class="card-title">Welcome</h1>
           <p class="card-text">
-            This is the public home page of the Angular OAuth2 PKCE SPA.
+            This is the public home page of the Stellar Density Analyzer.
             No authentication is required to view this page.
           </p>
           <p class="card-text text-secondary">

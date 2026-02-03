@@ -1,6 +1,7 @@
 DISTDIR=${CURDIR}/dist
 SPABALL=pkg/http/webroot.tar
-SPADIR=${CURDIR}/webroot
+SPADIR=${CURDIR}/frontend
+SPADISTDIR=$(SPADIR)/dist/stellar-density-analyzer/browser
 
 $(DISTDIR):
 	mkdir -p $@
@@ -25,4 +26,5 @@ $(DISTDIR)/sdaservice: go.mod $(SPABALL) $(shell find ./ -type f -name '*.go') |
 frontend: $(SPABALL)
 
 $(SPABALL): $(shell find $(SPADIR)/ -type f)
-	tar -C $(SPADIR)/ -cvf $@ .
+	$(MAKE) -C $(SPADIR) build
+	tar -C $(SPADISTDIR)/ -cvf $@ .

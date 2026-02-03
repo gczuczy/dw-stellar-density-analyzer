@@ -12,21 +12,15 @@ import { ApiService }                     from '../services/api.service';
  * {
  *   "clientId":         "my-spa-client",
  *   "issuer":           "https://auth.example.com/",
- *   "redirectUri":      "https://localhost:4200/callback",
- *   "scope":            "openid profile email",
- *   "authorizationUrl": "https://auth.example.com/authorize",
- *   "tokenUrl":         "https://auth.example.com/oauth/token",
- *   "jwksUrl":          "https://auth.example.com/.well-known/jwks.json"
+ *   "redirectUri":      "http://localhost:4200",
+ *   "scope":            "openid profile email"
  * }
  */
 export interface OAuthBackendConfig {
   clientId:            string;
-  authorizationUrl:    string;
-  tokenUrl:            string;
   redirectUri:         string;
   scope:               string;
-  issuer?:             string;
-  jwksUrl?:            string;
+  issuer:              string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,36 +36,34 @@ export class AuthService {
    * Called once by APP_INITIALIZER.
    *
    * 1. GETs /api/oauth/config  →  flat JSON  →  AuthConfig
-   * 2. Configures OAuthService  (PKCE is automatic when responseType = 'code')
-   * 3. tryLogin()  –  if ?code= is present the library exchanges it silently
+   * 2. Configures OAuthService (PKCE is automatic when responseType = 'code')
+   * 3. Loads discovery document and tries login (exchanges code if present)
    * 4. After exchange, navigates back to the originally-requested path
-   *    (stored in sessionStorage by authGuard)
    */
   initialize(): Observable<void> {
     return this.api.getConfig('/api/oauth/config').pipe(
 
       tap((cfg: Record<string, string>) => {
         const authConfig: AuthConfig = {
-          clientId:              cfg['clientId'],
-          issuer:                cfg['issuer']            || '',
-          redirectUri:           cfg['redirectUri']       || (window.location.origin + '/callback'),
-          scope:                 cfg['scope']             || 'openid profile email',
-          responseType:          'code',   // PKCE is activated automatically
-          authorizationEndpoint: cfg['authorizationUrl'],
-          tokenEndpoint:         cfg['tokenUrl'],
-          jwksUrl:               cfg['jwksUrl'],          // optional
+          issuer:       cfg['issuer'],
+          clientId:     cfg['clientId'],
+          redirectUri:  cfg['redirectUri']  || window.location.origin,
+          scope:        cfg['scope']        || 'openid profile email',
+          responseType: 'code',   // PKCE is activated automatically
+          showDebugInformation: false,
         };
         this.oauth.configure(authConfig);
       }),
 
       switchMap(() =>
-        from(this.oauth.tryLogin({ disableOidcChecks: true }))
+        // Load discovery document and try login in one call
+        from(this.oauth.loadDiscoveryDocumentAndTryLogin())
       ),
 
       tap(() => {
         // Redirect back to the page the user originally wanted to visit
         const target = sessionStorage.getItem('_redirectUri');
-        if (target) {
+        if (target && this.oauth.hasValidAccessToken()) {
           sessionStorage.removeItem('_redirectUri');
           this.router.navigateByUrl(target);
         }
@@ -89,13 +81,8 @@ export class AuthService {
 
   /** Decoded ID-token payload, or null. */
   get userInfo(): Record<string, unknown> | null {
-    const raw = this.oauth.getIdToken();
-    if (!raw) { return null; }
-    try {
-      return JSON.parse(atob(raw.split('.')[1]));
-    } catch {
-      return null;
-    }
+    const claims = this.oauth.getIdentityClaims();
+    return claims ? claims as Record<string, unknown> : null;
   }
 
   get accessToken(): string | null {
@@ -106,11 +93,13 @@ export class AuthService {
 
   /** Start the PKCE Authorization-Code flow (browser redirect to IdP). */
   login(): void {
-    this.oauth.initCodeFlowWithState(window.location.pathname);
+    // Store where we came from
+    sessionStorage.setItem('_redirectUri', window.location.pathname);
+    this.oauth.initCodeFlow();
   }
 
-  /** Logout + optional token revocation. */
+  /** Logout and clear tokens. */
   logout(): void {
-    this.oauth.logoutWithRedirect();
+    this.oauth.logOut();
   }
 }

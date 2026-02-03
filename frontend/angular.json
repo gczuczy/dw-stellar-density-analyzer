@@ -3,41 +3,39 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-oauth2-spa": {
-      "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "stellar-density-analyzer": {
       "projectType": "application",
       "schematics": {},
       "root": "",
       "sourceRoot": "src",
-      "indexFile": "index.html",
-      "tsConfig": "tsconfig.app.json",
+      "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "entryPoints": {
-              "main": "src/main.ts",
-              "styles": "src/styles.scss"
-            },
-            "index": {
-              "input": "src/index.html",
-              "output": "index.html"
-            },
-            "tsconfig": "tsconfig.app.json",
-            "polyfills": ["zone.js"],
+            "outputPath": "dist/stellar-density-analyzer",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
-                "from": "src/assets",
-                "to": "assets"
+                "input": "src/assets",
+                "output": "assets"
               },
               {
                 "glob": "favicon.ico",
-                "from": "src",
-                "to": ""
+                "input": "src",
+                "output": ""
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -53,19 +51,7 @@
                   "maximumError": "4KB"
                 }
               ],
-              "outputHashing": {
-                "global": true,
-                "media": true,
-                "scripts": true,
-                "images": true,
-                "fonts": true
-              },
-              "extractLicenses": false,
-              "sourceMap": false,
-              "namedChunks": false,
-              "aot": true,
-              "optimization": true,
-              "minify": true
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
@@ -79,16 +65,16 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "buildTarget": "angular-oauth2-spa:build:development",
-            "proxy": "proxy.conf.json",
+            "buildTarget": "stellar-density-analyzer:build:development",
+            "proxyConfig": "proxy.conf.json",
             "port": 4200
           },
           "configurations": {
             "production": {
-              "buildTarget": "angular-oauth2-spa:build:production"
+              "buildTarget": "stellar-density-analyzer:build:production"
             },
             "development": {
-              "buildTarget": "angular-oauth2-spa:build:development"
+              "buildTarget": "stellar-density-analyzer:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -96,27 +82,13 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
-            "buildTarget": "angular-oauth2-spa:build"
-          }
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "main": "src/test.ts",
-            "polyfills": ["zone.js", "zone.js/testing"],
-            "tsconfig": "tsconfig.spec.json",
-            "karma": "karma.conf.js",
-            "assets": [
-              {
-                "glob": "**/*",
-                "from": "src/assets",
-                "to": "assets"
-              }
-            ],
-            "styles": ["src/styles.scss"]
+            "buildTarget": "stellar-density-analyzer:build"
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
