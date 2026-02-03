@@ -23,9 +23,9 @@ import { AuthService }  from '../../auth/auth.service';
 
           <div class="card">
             <div class="card-body">
-              <h1 class="card-title">Welcome to Stellar Density Analyzer</h1>
+              <h1 class="card-title">Welcome to ED Survey Tools</h1>
               <p class="card-text">
-                This is the public home page of the Stellar Density Analyzer.
+                This is the public home page of the ED Survey Tools.
                 No authentication is required to view this page.
               </p>
               

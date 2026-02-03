@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# GNUmakefile – Stellar Density Analyzer
+# GNUmakefile – ED Survey Tools
 #
 # Targets
 #   devserver   – install deps (if needed) and start the Angular dev server
@@ -24,7 +24,7 @@ node_modules: package.json
 	$(NPM) install
 
 # ── build ────────────────────────────────────────────────────────────────────
-# Production AOT build.  Output lands in ./dist/stellar-density-analyzer/browser/
+# Production AOT build.  Output lands in ./dist/ed-survey-tools/browser/
 build: node_modules
 	$(NG) build --configuration production
 

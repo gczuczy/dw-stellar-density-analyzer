@@ -1,4 +1,4 @@
-# Stellar Density Analyzer
+# ED Survey Tools
 
 Angular 20 Single-Page Application with OAuth2 PKCE authentication, Bootstrap 5 UI, and a reusable API service architecture.
 

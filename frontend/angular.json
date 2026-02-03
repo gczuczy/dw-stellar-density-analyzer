@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "stellar-density-analyzer": {
+    "ed-survey-tools": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/stellar-density-analyzer",
+            "outputPath": "dist/ed-survey-tools",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -65,16 +65,16 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "buildTarget": "stellar-density-analyzer:build:development",
+            "buildTarget": "ed-survey-tools:build:development",
             "proxyConfig": "proxy.conf.json",
             "port": 4200
           },
           "configurations": {
             "production": {
-              "buildTarget": "stellar-density-analyzer:build:production"
+              "buildTarget": "ed-survey-tools:build:production"
             },
             "development": {
-              "buildTarget": "stellar-density-analyzer:build:development"
+              "buildTarget": "ed-survey-tools:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -82,7 +82,7 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
-            "buildTarget": "stellar-density-analyzer:build"
+            "buildTarget": "ed-survey-tools:build"
           }
         }
       }
