@@ -1,0 +1,47 @@
+// ─── Bootstrap ──────────────────────────────────────────────────────────────
+// Import the full Bootstrap SCSS.  Bootstrap 5.3+ natively supports
+// data-bs-theme="dark" on <html>, so we don't need a separate dark stylesheet.
+@import "bootstrap/scss/bootstrap";
+
+// ─── Global helpers ─────────────────────────────────────────────────────────
+// A thin utility class applied to the page-wrapper so that
+// min-height stretches the content area below the fixed navbar.
+.page-wrapper {
+  min-height: calc(100vh - 56px); // 56 px = default navbar height
+  padding-top: 1.5rem;
+}
+
+// ─── Navbar brand tweaks ────────────────────────────────────────────────────
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+// ─── Sidebar (used by the "sidemenu" route) ────────────────────────────────
+.sidebar {
+  width: 240px;
+  min-height: calc(100vh - 56px);
+  background-color: var(--bs-secondary-subtle);
+  border-right: 1px solid var(--bs-border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+
+  .nav-link {
+    color: var(--bs-body-color);
+    padding: 0.65rem 1rem;
+    border-radius: 0.35rem;
+    margin: 0.15rem 0.5rem;
+    transition: background-color 0.2s;
+
+    &:hover,
+    &.active {
+      background-color: var(--bs-primary-subtle);
+      color: var(--bs-primary);
+    }
+  }
+}
+
+// ─── Card polish ────────────────────────────────────────────────────────────
+.card {
+  border-radius: 0.6rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
