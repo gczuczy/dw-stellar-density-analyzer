@@ -30,32 +30,53 @@ import { AuthService }                    from '../../auth/auth.service';
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
 
-          <!-- 3rd menu – barfoo – public ─────────────────────────────── -->
+          <!-- 1st menu - Barfoo (public) ────────────────────────────── -->
           <li class="nav-item">
             <a class="nav-link" routerLink="/barfoo" routerLinkActive="active">Barfoo</a>
           </li>
 
-          <!-- 2nd menu – foobar – login-protected (guard on the route) ─ -->
+          <!-- 2nd menu - Public Menu with sidebar (public) ──────────── -->
           <li class="nav-item">
-            <a class="nav-link" routerLink="/foobar" routerLinkActive="active">Foobar</a>
+            <a class="nav-link" routerLink="/public-menu" 
+               [class.active]="isPublicMenuActive">
+              Public Menu
+            </a>
           </li>
 
-          <!-- 4th menu – Side Menu dropdown – login-protected ─────────── -->
-          <li class="nav-item" ngbDropdown>
-            <a class="nav-link dropdown-toggle" ngbDropdownToggle
-               [class.active]="isSidemenuActive">
-              Side Menu
-            </a>
-            <div ngbDropdownMenu>
-              <a ngbDropdownItem routerLink="/sidemenu/alpha">Alpha</a>
-              <a ngbDropdownItem routerLink="/sidemenu/beta" >Beta</a>
-            </div>
-          </li>
+          @if (!authService.isConfigured) {
+            <!-- Auth config failed warning ───────────────────────────── -->
+            <li class="nav-item">
+              <span class="nav-link text-warning" 
+                    title="Authentication service unavailable - only public pages accessible">
+                ⚠️ Auth Unavailable
+              </span>
+            </li>
+          } @else if (authService.isLoggedIn) {
+            <!-- Protected menus - only show when logged in ──────────── -->
+            
+            <!-- 3rd menu - Foobar (protected) ────────────────────────── -->
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/foobar" routerLinkActive="active">Foobar</a>
+            </li>
+
+            <!-- 4th menu - Side Menu dropdown (protected) ────────────── -->
+            <li class="nav-item" ngbDropdown>
+              <a class="nav-link dropdown-toggle" ngbDropdownToggle
+                 [class.active]="isSidemenuActive">
+                Side Menu
+              </a>
+              <div ngbDropdownMenu>
+                <a ngbDropdownItem routerLink="/sidemenu/alpha">Alpha</a>
+                <a ngbDropdownItem routerLink="/sidemenu/beta" >Beta</a>
+              </div>
+            </li>
+          }
         </ul>
 
-        <!-- ── Right-aligned: Settings dropdown / Login button ─────── -->
+        <!-- ── Right-aligned: Settings/Login ──────────────────────────── -->
         <ul class="navbar-nav ms-auto">
           @if (authService.isLoggedIn) {
+            <!-- Settings dropdown (protected) ────────────────────────── -->
             <li class="nav-item" ngbDropdown placement="bottom-end">
               <button class="btn btn-outline-secondary btn-sm" ngbDropdownToggle>
                 ⚙ Settings
@@ -66,7 +87,8 @@ import { AuthService }                    from '../../auth/auth.service';
                 <button ngbDropdownItem (click)="logout()">Logout</button>
               </div>
             </li>
-          } @else {
+          } @else if (authService.isConfigured) {
+            <!-- Login button (only when auth is configured) ──────────── -->
             <li class="nav-item">
               <button class="btn btn-primary btn-sm" (click)="login()">Login</button>
             </li>
@@ -89,16 +111,22 @@ import { AuthService }                    from '../../auth/auth.service';
       &:hover  { color: var(--bs-primary); }
       &.active { font-weight: 600; color: var(--bs-primary) !important; }
     }
+
+    .text-warning {
+      cursor: help;
+    }
   `]
 })
 export class NavbarComponent implements OnInit {
   isSidemenuActive = false;
+  isPublicMenuActive = false;
 
   constructor(public authService: AuthService) {}
 
   ngOnInit(): void {
     const check = () => {
       this.isSidemenuActive = window.location.pathname.startsWith('/sidemenu');
+      this.isPublicMenuActive = window.location.pathname.startsWith('/public-menu');
     };
     check();
     window.addEventListener('popstate', check);
