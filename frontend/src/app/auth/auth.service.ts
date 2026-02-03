@@ -43,7 +43,8 @@ export class AuthService {
         const authConfig: AuthConfig = {
           issuer:       cfg['issuer'],
           clientId:     cfg['clientId'],
-          redirectUri:  cfg['redirectUri']  || window.location.origin,
+	  // Backend callback endpoint - see BACKEND_INTEGRATION.md for implementation details
+          redirectUri:  cfg['redirectUri']  || `${window.location.origin}/api/auth/callback`,
           scope:        cfg['scope']        || 'openid profile email',
           responseType: 'code',
           showDebugInformation: false,

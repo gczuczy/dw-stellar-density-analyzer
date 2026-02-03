@@ -39,19 +39,32 @@ This will install all required packages including:
 
 ### 2. Configure Backend
 
-The application expects an OAuth2 configuration endpoint at `/api/oauth/config` that returns a flat JSON object:
+The application requires a backend to handle OAuth2 authentication callbacks and maintain server-side sessions.
+
+**Required Backend Endpoints:**
+- `GET /api/oauth/config` - Provides OAuth configuration to frontend
+- `GET /api/auth/callback` - Handles OAuth callback from IdP, creates session, redirects to frontend
+
+**📖 See [BACKEND_INTEGRATION.md](BACKEND_INTEGRATION.md) for complete implementation guide with code examples**
+
+#### Quick Backend Config
+
+The `/api/oauth/config` endpoint should return:
 
 ```json
 {
   "clientId": "your-spa-client-id",
-  "authorizationUrl": "https://your-idp.com/authorize",
-  "tokenUrl": "https://your-idp.com/oauth/token",
-  "redirectUri": "http://localhost:4200/callback",
-  "scope": "openid profile email",
   "issuer": "https://your-idp.com/",
-  "jwksUrl": "https://your-idp.com/.well-known/jwks.json"
+  "redirectUri": "http://localhost:4200/api/auth/callback",
+  "scope": "openid profile email"
 }
 ```
+
+The `/api/auth/callback` endpoint must:
+1. Receive authorization code from IdP
+2. Exchange code for tokens
+3. Extract user identity and create server-side session
+4. Redirect back to `/?code={code}&state={state}` so frontend can complete PKCE flow
 
 The development server (port 4200) proxies all `/api/*` requests to `http://localhost:8081` — configure this in `proxy.conf.json` if your backend runs elsewhere.
 
@@ -73,7 +86,7 @@ npm run build
 make build
 ```
 
-Output lands in `dist/stellar-density-analyzer/browser/`.
+Output lands in `dist/ed-survey-tools/browser/`.
 
 ## Makefile Targets
 
@@ -86,7 +99,7 @@ A `GNUmakefile` is provided for convenience:
 ## Project Structure
 
 ```
-stellar-density-analyzer/
+ed-survey-tools/
 ├── src/
 │   ├── app/
 │   │   ├── auth/
