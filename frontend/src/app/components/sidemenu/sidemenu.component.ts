@@ -7,7 +7,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <div class="row g-0">
+    <div class="row g-0 sidemenu-layout">
 
       <!-- ── Sidebar ─────────────────────────────────────────────── -->
       <div class="col-auto sidebar p-3">
@@ -34,6 +34,11 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <router-outlet></router-outlet>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .sidemenu-layout {
+      margin-top: 56px; /* Height of fixed navbar */
+    }
+  `]
 })
 export class SidemenuComponent {}
