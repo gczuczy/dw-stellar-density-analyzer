@@ -82,6 +82,11 @@ func afterConn(ctx context.Context, dbc *pgx.Conn) error {
 	return nil
 }
 
+func (p *DBPool) Close() error {
+	p.pool.Close()
+	return nil
+}
+
 func (p *DBPool) AddSurvey(m *ds.Survey) (err error) {
 	conn, err := p.pool.Acquire(p.ctx)
 	if err != nil {

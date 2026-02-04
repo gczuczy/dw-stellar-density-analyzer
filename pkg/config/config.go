@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	DB DBConfig `koanf:"db"`
+	HTTP HTTPConfig `koanf:"http"`
 }
 
 type DBConfig struct {
@@ -18,6 +19,10 @@ type DBConfig struct {
 	Password string `koanf:"password"`
 	MaxConns int32 `koanf:"maxconns"`
 	MinConns int32 `koanf:"minconns"`
+}
+
+type HTTPConfig struct {
+	Port uint16 `koanf:"port"`
 }
 
 func ParseConfig(k *koanf.Koanf) (*Config, error) {
@@ -34,6 +39,9 @@ func ParseConfig(k *koanf.Koanf) (*Config, error) {
 		DB: DBConfig{
 			MaxConns: 8,
 			MinConns: 1,
+		},
+		HTTP: HTTPConfig{
+			Port: 80,
 		},
 	}
 	if err = k.Unmarshal("", &cfg); err != nil {

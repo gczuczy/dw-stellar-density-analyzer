@@ -3,11 +3,13 @@ module github.com/gczuczy/dw-stellar-density-analyzer
 go 1.25.6
 
 require (
+	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.1
 	github.com/knadh/koanf/providers/posflag v1.0.1
 	github.com/knadh/koanf/v2 v2.3.0
+	github.com/quay/claircore v1.5.48
 	github.com/spf13/pflag v1.0.10
 	golang.org/x/oauth2 v0.34.0
 	google.golang.org/api v0.260.0
