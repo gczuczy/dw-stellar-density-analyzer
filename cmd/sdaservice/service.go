@@ -57,7 +57,7 @@ func Run() {
 	}
 	defer db.Pool.Close()
 
-	if hs, err = http.New(&cfg.HTTP); err != nil {
+	if hs, err = http.New(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "err: %v\n", err)
 		os.Exit(1)
 	}

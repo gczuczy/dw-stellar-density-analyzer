@@ -25,6 +25,6 @@ $(DISTDIR)/sdaservice: go.mod $(SPABALL) $(shell find ./ -type f -name '*.go') |
 .PHONY: frontend
 frontend: $(SPABALL)
 
-$(SPABALL): $(shell find $(SPADIR)/ -type f)
+$(SPABALL): $(shell find $(SPADIR)/src -type f)
 	$(MAKE) -C $(SPADIR) build
 	tar -C $(SPADISTDIR)/ -cvf $@ .

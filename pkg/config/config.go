@@ -9,6 +9,7 @@ import (
 type Config struct {
 	DB DBConfig `koanf:"db"`
 	HTTP HTTPConfig `koanf:"http"`
+	OAuth2 OAuth2Config `koanf:"oauth2"`
 }
 
 type DBConfig struct {
@@ -24,6 +25,13 @@ type DBConfig struct {
 type HTTPConfig struct {
 	Port uint16 `koanf:"port"`
 }
+
+type OAuth2Config struct {
+	ClientID string `koanf:"clientid"`
+	ClientSecret string `koanf:"clientsecret"`
+	Issuer string `koanf:"issuer"`
+}
+
 
 func ParseConfig(k *koanf.Koanf) (*Config, error) {
 	var (

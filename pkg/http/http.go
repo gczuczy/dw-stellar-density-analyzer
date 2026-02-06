@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http/api"
 	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
 )
 
@@ -17,7 +18,7 @@ type HTTPService struct {
 	srv http.Server
 }
 
-func New(cfg *config.HTTPConfig) (*HTTPService, error) {
+func New(cfg *config.Config) (*HTTPService, error) {
 
 	spa, err := newSPAHandler()
 	if err != nil {
@@ -25,13 +26,16 @@ func New(cfg *config.HTTPConfig) (*HTTPService, error) {
 	}
 
 	router := mux.NewRouter()
-	// apiRouter := router.PathPRefix("/api").SubRouter()
+	apisr := router.PathPrefix("/api").Subrouter()
+	if err = api.Init(apisr, &cfg.OAuth2); err != nil {
+		return nil, err
+	}
 	router.PathPrefix(`/`).Handler(spa)
 
 	hs := HTTPService{
-		config: cfg,
+		config: &cfg.HTTP,
 		srv: http.Server{
-			Addr: fmt.Sprintf(":%d", cfg.Port),
+			Addr: fmt.Sprintf(":%d", cfg.HTTP.Port),
 			Handler: router,
 		},
 	}

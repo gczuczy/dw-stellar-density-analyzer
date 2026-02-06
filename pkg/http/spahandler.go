@@ -42,7 +42,6 @@ func newSPAHandler() (*SPAHandler, error) {
 func (h *SPAHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	requestPath := path.Clean(r.URL.Path)
-	fmt.Printf("Request: %s\n", requestPath)
 
 	if strings.HasPrefix(requestPath, `/`) {
 		requestPath = requestPath[1:]
@@ -51,7 +50,6 @@ func (h *SPAHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(requestPath)==0 {
 		requestPath = h.index
 	}
-	fmt.Printf(" adjusted: %s\n", requestPath)
 
 	var st fs.FileInfo
 	var err error
@@ -63,6 +61,5 @@ func (h *SPAHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf(" Serving on fshandler: %s\n", requestPath)
 	http.ServeFileFS(w, r, h.fsys, requestPath)
 }
