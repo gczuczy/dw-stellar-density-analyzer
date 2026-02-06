@@ -8,6 +8,10 @@ The whole project can be built using the root `GNUmakefile`'s `build` target. Th
 
 Programming patterns need to be respected, code shouldn't be duplicated, but reused. Avoid code duplication and aim for patterns.
 
+Do not do any modifications to the git tree without an explicit prompt for it.
+
+Always plan first, examine your offered solution, look for errors, fix them and iterate until you do not find errors. Then build the project, handle the build errors and start over until all errors are eliminated. Never return with a failing build.
+
 
 # API
 

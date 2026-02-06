@@ -1,7 +1,7 @@
 DISTDIR=${CURDIR}/dist
 SPABALL=pkg/http/webroot.tar
 SPADIR=${CURDIR}/frontend
-SPADISTDIR=$(SPADIR)/dist/stellar-density-analyzer/browser
+SPADISTDIR=$(SPADIR)/dist/ed-survey-tools/browser
 
 $(DISTDIR):
 	mkdir -p $@

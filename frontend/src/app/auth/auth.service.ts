@@ -32,22 +32,22 @@ export class AuthService {
    * and allow the app to continue loading (public pages will work).
    */
   initialize(): Observable<void> {
-    return this.api.getConfig('/api/oauth/config').pipe(
+    return this.api.getConfig<OAuthBackendConfig>('/api/oauth/config').pipe(
 
-      tap((cfg: Record<string, string>) => {
+      tap((cfg: OAuthBackendConfig) => {
         // Validate required fields
-        if (!cfg['issuer'] || !cfg['clientId']) {
+        if (!cfg.issuer || !cfg.clientId) {
           throw new Error('OAuth config missing required fields: issuer, clientId');
         }
 
         const authConfig: AuthConfig = {
-          issuer:       cfg['issuer'],
-          clientId:     cfg['clientId'],
-	  // Backend callback endpoint - see BACKEND_INTEGRATION.md for implementation details
-          redirectUri:  cfg['redirectUri']  || `${window.location.origin}/api/auth/callback`,
-          scope:        cfg['scope']        || 'openid profile email',
+          issuer:       cfg.issuer,
+          clientId:     cfg.clientId,
+          redirectUri:  cfg.redirectUri  || `${window.location.origin}/api/auth/callback`,
+          scope:        cfg.scope        || 'openid profile email',
           responseType: 'code',
           showDebugInformation: false,
+					requireHttps: false,
         };
         this.oauth.configure(authConfig);
       }),

@@ -1,6 +1,13 @@
 import { Injectable }              from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable }              from 'rxjs';
+import { map }                     from 'rxjs/operators';
+
+export interface ApiResponse<T> {
+  status:   string;
+  message?: string;
+  data?:    T;
+}
 
 /**
  * Generic HTTP client service with typed methods.
@@ -13,10 +20,12 @@ export class ApiService {
 
   /**
    * Fetches configuration from a backend endpoint.
-   * Returns the JSON response as a Record<string, string>.
+   * Unwraps the standard API response envelope and returns the data payload.
    */
-  getConfig(url: string): Observable<Record<string, string>> {
-    return this.http.get<Record<string, string>>(url);
+  getConfig<T>(url: string): Observable<T> {
+    return this.http.get<ApiResponse<T>>(url).pipe(
+      map(resp => resp.data as T)
+    );
   }
 
   // ── Generic typed HTTP methods ────────────────────────────────────────────
