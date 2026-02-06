@@ -26,8 +26,8 @@ This document describes the backend endpoints required for the ED Survey Tools f
 - `redirectUri` (optional) - The callback URL. Defaults to `{origin}/api/auth/callback` if not provided.
 - `scope` (optional) - OAuth2 scopes to request. Defaults to `"openid profile email"`.
 
-**Example Implementation (Node.js/Express):**
-```javascript
+**Example Implementation:**
+```bash
 app.get('/api/oauth/config', (req, res) => {
   res.json({
     issuer: process.env.OAUTH_ISSUER,
@@ -36,6 +36,20 @@ app.get('/api/oauth/config', (req, res) => {
     scope: 'openid profile email'
   });
 });
+```
+
+**Or in Go:**
+```go
+func handleOAuthConfig(w http.ResponseWriter, r *http.Request) {
+  config := map[string]string{
+    "issuer":      os.Getenv("OAUTH_ISSUER"),
+    "clientId":    os.Getenv("OAUTH_CLIENT_ID"),
+    "redirectUri": "http://localhost:4200/api/auth/callback",
+    "scope":       "openid profile email",
+  }
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(config)
+}
 ```
 
 ---
@@ -83,51 +97,232 @@ app.get('/api/oauth/config', (req, res) => {
    - The frontend's angular-oauth2-oidc will complete the PKCE flow
    - Frontend will then have the access token in browser sessionStorage
 
-**Example Implementation (Node.js/Express with Passport.js):**
+**Example Implementation (Go with Gorilla sessions and go-oidc):**
 
-```javascript
-const passport = require('passport');
-const { Strategy: OidcStrategy } = require('passport-openidconnect');
+```go
+package main
 
-// Configure OIDC strategy
-passport.use('oidc', new OidcStrategy({
-  issuer: process.env.OAUTH_ISSUER,
-  authorizationURL: process.env.OAUTH_AUTH_URL,
-  tokenURL: process.env.OAUTH_TOKEN_URL,
-  userInfoURL: process.env.OAUTH_USERINFO_URL,
-  clientID: process.env.OAUTH_CLIENT_ID,
-  clientSecret: process.env.OAUTH_CLIENT_SECRET,
-  callbackURL: '/api/auth/callback',
-  scope: 'openid profile email'
-}, (issuer, profile, done) => {
-  // Store user profile in session
-  return done(null, {
-    id: profile.id,
-    email: profile.emails[0].value,
-    name: profile.displayName,
-    claims: profile._json
-  });
-}));
+import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
+	"log"
+	"net/http"
+	"os"
 
-// Serialize user to session
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gorilla/sessions"
+	"golang.org/x/oauth2"
+)
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
+var (
+	oauth2Config *oauth2.Config
+	oidcVerifier *oidc.IDTokenVerifier
+	store        *sessions.CookieStore
+)
 
-// Callback route
-app.get('/api/auth/callback',
-  passport.authenticate('oidc', { failureRedirect: '/login-failed' }),
-  (req, res) => {
-    // Authentication successful
-    // Redirect back to frontend with the original code and state
-    const { code, state } = req.query;
-    res.redirect(`/?code=${code}&state=${state}`);
-  }
-);
+func init() {
+	// Initialize session store
+	sessionSecret := os.Getenv("SESSION_SECRET")
+	if sessionSecret == "" {
+		sessionSecret = generateRandomString(32)
+		log.Println("Warning: Using random session secret")
+	}
+	store = sessions.NewCookieStore([]byte(sessionSecret))
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7, // 7 days
+		HttpOnly: true,
+		Secure:   os.Getenv("NODE_ENV") == "production",
+		SameSite: http.SameSiteLaxMode,
+	}
+}
+
+func main() {
+	ctx := context.Background()
+
+	// Initialize OIDC provider
+	provider, err := oidc.NewProvider(ctx, os.Getenv("OAUTH_ISSUER"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Configure OAuth2
+	oauth2Config = &oauth2.Config{
+		ClientID:     os.Getenv("OAUTH_CLIENT_ID"),
+		ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
+		RedirectURL:  "http://localhost:4200/api/auth/callback",
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	// Configure OIDC verifier
+	oidcVerifier = provider.Verifier(&oidc.Config{
+		ClientID: os.Getenv("OAUTH_CLIENT_ID"),
+	})
+
+	// Routes
+	http.HandleFunc("/api/oauth/config", handleOAuthConfig)
+	http.HandleFunc("/api/auth/callback", handleAuthCallback)
+	http.HandleFunc("/api/auth/user", handleAuthUser)
+	http.HandleFunc("/api/auth/logout", handleLogout)
+
+	log.Println("Server starting on :8081")
+	log.Fatal(http.ListenAndServe(":8081", nil))
+}
+
+// OAuth configuration endpoint
+func handleOAuthConfig(w http.ResponseWriter, r *http.Request) {
+	config := map[string]string{
+		"issuer":      os.Getenv("OAUTH_ISSUER"),
+		"clientId":    os.Getenv("OAUTH_CLIENT_ID"),
+		"redirectUri": "http://localhost:4200/api/auth/callback",
+		"scope":       "openid profile email",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(config)
+}
+
+// OAuth callback handler
+func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Get authorization code from query
+	code := r.URL.Query().Get("code")
+	state := r.URL.Query().Get("state")
+
+	if code == "" {
+		http.Error(w, "Missing authorization code", http.StatusBadRequest)
+		return
+	}
+
+	// Exchange code for tokens
+	oauth2Token, err := oauth2Config.Exchange(ctx, code)
+	if err != nil {
+		log.Printf("Code exchange failed: %v", err)
+		http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract ID token
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		http.Error(w, "No id_token in token response", http.StatusInternalServerError)
+		return
+	}
+
+	// Verify ID token
+	idToken, err := oidcVerifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		log.Printf("ID token verification failed: %v", err)
+		http.Error(w, "Failed to verify ID token", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract claims
+	var claims struct {
+		Sub   string `json:"sub"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+	if err := idToken.Claims(&claims); err != nil {
+		http.Error(w, "Failed to parse claims", http.StatusInternalServerError)
+		return
+	}
+
+	// Create session
+	session, _ := store.Get(r, "auth-session")
+	session.Values["user_id"] = claims.Sub
+	session.Values["user_email"] = claims.Email
+	session.Values["user_name"] = claims.Name
+	session.Values["access_token"] = oauth2Token.AccessToken
+
+	if err := session.Save(r, w); err != nil {
+		log.Printf("Failed to save session: %v", err)
+		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		return
+	}
+
+	// Redirect back to frontend with original code and state
+	// This allows the frontend to complete its PKCE flow
+	redirectURL := "/?code=" + code
+	if state != "" {
+		redirectURL += "&state=" + state
+	}
+
+	http.Redirect(w, r, redirectURL, http.StatusFound)
+}
+
+// User info endpoint
+func handleAuthUser(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "auth-session")
+
+	userID, ok := session.Values["user_id"].(string)
+	if !ok || userID == "" {
+		json.NewEncoder(w).Encode(map[string]bool{
+			"authenticated": false,
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"userId":        session.Values["user_id"],
+		"email":         session.Values["user_email"],
+		"name":          session.Values["user_name"],
+		"authenticated": true,
+	})
+}
+
+// Logout endpoint
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	session, _ := store.Get(r, "auth-session")
+	session.Options.MaxAge = -1 // Delete session
+
+	if err := session.Save(r, w); err != nil {
+		http.Error(w, "Failed to logout", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{
+		"success": true,
+	})
+}
+
+// Utility function to generate random strings
+func generateRandomString(length int) string {
+	bytes := make([]byte, length)
+	rand.Read(bytes)
+	return base64.URLEncoding.EncodeToString(bytes)[:length]
+}
+```
+
+**Required Go dependencies:**
+```bash
+go get github.com/coreos/go-oidc/v3/oidc
+go get github.com/gorilla/sessions
+go get golang.org/x/oauth2
+```
+
+**go.mod example:**
+```go
+module your-backend
+
+go 1.21
+
+require (
+	github.com/coreos/go-oidc/v3 v3.9.0
+	github.com/gorilla/sessions v1.2.2
+	golang.org/x/oauth2 v0.16.0
+)
 ```
 
 **Alternative: Simpler Implementation (Python/Flask)**
@@ -206,7 +401,7 @@ def auth_callback():
 }
 ```
 
-**Example Implementation:**
+**Example Implementation (Node.js):**
 ```javascript
 app.get('/api/auth/user', (req, res) => {
   if (req.user) {
@@ -220,6 +415,29 @@ app.get('/api/auth/user', (req, res) => {
     res.json({ authenticated: false });
   }
 });
+```
+
+**Example Implementation (Go):**
+```go
+func handleAuthUser(w http.ResponseWriter, r *http.Request) {
+  session, _ := store.Get(r, "auth-session")
+  
+  userID, ok := session.Values["user_id"].(string)
+  if !ok || userID == "" {
+    json.NewEncoder(w).Encode(map[string]bool{
+      "authenticated": false,
+    })
+    return
+  }
+  
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]interface{}{
+    "userId":        session.Values["user_id"],
+    "email":         session.Values["user_email"],
+    "name":          session.Values["user_name"],
+    "authenticated": true,
+  })
+}
 ```
 
 ---
@@ -237,7 +455,7 @@ app.get('/api/auth/user', (req, res) => {
 }
 ```
 
-**Example Implementation:**
+**Example Implementation (Node.js):**
 ```javascript
 app.post('/api/auth/logout', (req, res) => {
   req.session.destroy((err) => {
@@ -248,6 +466,27 @@ app.post('/api/auth/logout', (req, res) => {
     res.json({ success: true });
   });
 });
+```
+
+**Example Implementation (Go):**
+```go
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+  if r.Method != http.MethodPost {
+    http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+    return
+  }
+  
+  session, _ := store.Get(r, "auth-session")
+  session.Options.MaxAge = -1 // Delete session
+  
+  if err := session.Save(r, w); err != nil {
+    http.Error(w, "Failed to logout", http.StatusInternalServerError)
+    return
+  }
+  
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]bool{"success": true})
+}
 ```
 
 ---
@@ -269,11 +508,27 @@ app.post('/api/auth/logout', (req, res) => {
 ### CORS Configuration
 Since frontend and backend are on the same origin (proxied via `/api`), CORS is not an issue in development. In production:
 
+**Node.js/Express:**
 ```javascript
 app.use(cors({
   origin: 'https://your-frontend-domain.com',
   credentials: true
 }));
+```
+
+**Go with rs/cors:**
+```go
+import "github.com/rs/cors"
+
+c := cors.New(cors.Options{
+  AllowedOrigins:   []string{"https://your-frontend-domain.com"},
+  AllowCredentials: true,
+  AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+  AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
+})
+
+handler := c.Handler(http.DefaultServeMux)
+http.ListenAndServe(":8081", handler)
 ```
 
 ---
@@ -363,22 +618,28 @@ curl -b cookies.txt http://localhost:8081/api/auth/user
 
 Your backend should configure these environment variables:
 
+**For Go backend:**
 ```bash
 # OAuth2/OIDC Provider
 OAUTH_ISSUER=https://your-idp.example.com
 OAUTH_CLIENT_ID=your-spa-client-id
 OAUTH_CLIENT_SECRET=your-client-secret  # Required for code exchange
-OAUTH_AUTH_URL=https://your-idp.example.com/authorize
-OAUTH_TOKEN_URL=https://your-idp.example.com/oauth/token
-OAUTH_USERINFO_URL=https://your-idp.example.com/userinfo
 
 # Session
 SESSION_SECRET=your-random-secret-key-here
-SESSION_COOKIE_NAME=edsurvey.sid
 
 # Application
 PORT=8081
-NODE_ENV=development
+NODE_ENV=development  # or production
+```
+
+**For Python backend:**
+```bash
+# Same as above, plus:
+OAUTH_AUTH_URL=https://your-idp.example.com/authorize
+OAUTH_TOKEN_URL=https://your-idp.example.com/oauth/token
+OAUTH_USERINFO_URL=https://your-idp.example.com/userinfo
+SESSION_COOKIE_NAME=edsurvey.sid
 ```
 
 ---
