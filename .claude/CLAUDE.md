@@ -4,13 +4,14 @@ This project has a golang-based backend in its root directory, and its angular-b
 
 # Common notes
 
-The whole project can be built using the root `GNUmakefile`'s `build` target. This packs the frontend as well and embeds it into the binary.
+The whole project can be built using the root `GNUmakefile`'s `build` target. This packs the frontend as well and embeds it into the binary. And since it's gnumake prefer using `gmake` instead of `make`.
 
 Programming patterns need to be respected, code shouldn't be duplicated, but reused. Avoid code duplication and aim for patterns.
 
 Do not do any modifications to the git tree without an explicit prompt for it.
 
 Always plan first, examine your offered solution, look for errors, fix them and iterate until you do not find errors. Then build the project, handle the build errors and start over until all errors are eliminated. Never return with a failing build.
+
 
 
 # API
@@ -34,7 +35,7 @@ The backend both serves the frontend from the root(`/`), and provides an api fro
 
 # frontend
 
-To build just the frontend use the `frontend/GNUmakefile`'s `build` target.
+To build just the frontend use the `frontend/GNUmakefile`'s `build` target. Simply use the command `gmake -C frontend/ build` to build this.
 
 The project is angular20 based.
 
