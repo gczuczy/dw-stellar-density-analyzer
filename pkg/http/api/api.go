@@ -6,8 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http/api/auth"
+	"github.com/gczuczy/ed-survey-tools/pkg/config"
+	"github.com/gczuczy/ed-survey-tools/pkg/http/api/auth"
 )
 
 func Init(r *mux.Router, cfg *config.OAuth2Config) error {

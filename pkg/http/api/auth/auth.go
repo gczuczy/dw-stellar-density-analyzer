@@ -3,8 +3,8 @@ package auth
 import (
 	"github.com/gorilla/mux"
 
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http/wrappers"
+	"github.com/gczuczy/ed-survey-tools/pkg/config"
+	"github.com/gczuczy/ed-survey-tools/pkg/http/wrappers"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"net/http"
 
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http/wrappers"
+	"github.com/gczuczy/ed-survey-tools/pkg/http/wrappers"
 )
 
 type Config struct {

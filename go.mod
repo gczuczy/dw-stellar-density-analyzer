@@ -1,4 +1,4 @@
-module github.com/gczuczy/dw-stellar-density-analyzer
+module github.com/gczuczy/ed-survey-tools
 
 go 1.25.6
 

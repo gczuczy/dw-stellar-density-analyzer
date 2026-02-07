@@ -6,7 +6,8 @@
       "Bash(npm run test *)",
 			"Bash(gmake build)",
 			"Bash(gmake -C frontend/ build)",
-			"Bash(gmake -C /home/gczuczy/github.com/gczuczy/dw-stellar-density-analyzer/frontend/ build)"
+			"Edit(/**/*.go)",
+			"Edit(/frontend/**)"
     ],
     "deny": [
     ]

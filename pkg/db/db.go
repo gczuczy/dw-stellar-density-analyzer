@@ -10,8 +10,8 @@ import (
 	//"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5"
 
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
-	ds "github.com/gczuczy/dw-stellar-density-analyzer/pkg/densitysurvey"
+	"github.com/gczuczy/ed-survey-tools/pkg/config"
+	ds "github.com/gczuczy/ed-survey-tools/pkg/densitysurvey"
 )
 
 var (

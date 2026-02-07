@@ -1,7 +1,7 @@
 package densitysurvey
 
 import (
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/edsm"
+	"github.com/gczuczy/ed-survey-tools/pkg/edsm"
 )
 
 var (

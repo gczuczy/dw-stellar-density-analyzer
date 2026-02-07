@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gczuczy/dw-stellar-density-analyzer/cmd/sdaservice"
+	"github.com/gczuczy/ed-survey-tools/cmd/sdaservice"
 )
 
 

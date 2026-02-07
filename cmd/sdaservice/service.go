@@ -10,9 +10,9 @@ import (
 	"github.com/knadh/koanf/providers/posflag"
 	flag "github.com/spf13/pflag"
 
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/config"
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http"
-	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/db"
+	"github.com/gczuczy/ed-survey-tools/pkg/config"
+	"github.com/gczuczy/ed-survey-tools/pkg/http"
+	"github.com/gczuczy/ed-survey-tools/pkg/db"
 )
 
 func parseArgs(k *koanf.Koanf) error {
