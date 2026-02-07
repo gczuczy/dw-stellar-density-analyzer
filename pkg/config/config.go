@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
@@ -30,6 +32,8 @@ type OAuth2Config struct {
 	ClientID string `koanf:"clientid"`
 	ClientSecret string `koanf:"clientsecret"`
 	Issuer string `koanf:"issuer"`
+	AuthorizeURL string `koanf:"authorizeUrl"`
+	TokenURL string `koanf:"tokenUrl"`
 }
 
 
@@ -51,9 +55,20 @@ func ParseConfig(k *koanf.Koanf) (*Config, error) {
 		HTTP: HTTPConfig{
 			Port: 80,
 		},
+		OAuth2: OAuth2Config{
+			Issuer: "https://auth.frontierstore.net",
+		},
 	}
 	if err = k.Unmarshal("", &cfg); err != nil {
 		return nil, err
+	}
+
+	// adjust oauth2 config
+	if len(cfg.OAuth2.AuthorizeURL)==0 {
+		cfg.OAuth2.AuthorizeURL = fmt.Sprintf("%s/auth", cfg.OAuth2.Issuer)
+	}
+	if len(cfg.OAuth2.TokenURL)==0 {
+		cfg.OAuth2.TokenURL = fmt.Sprintf("%s/token", cfg.OAuth2.Issuer)
 	}
 
 	return &cfg, nil

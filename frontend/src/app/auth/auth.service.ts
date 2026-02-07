@@ -6,7 +6,7 @@ import { Router }                         from '@angular/router';
 import { ApiService }                     from '../services/api.service';
 
 /**
- * The flat key→value shape that `/api/oauth/config` must return.
+ * The flat key→value shape that `/api/auth/config` must return.
  */
 export interface OAuthBackendConfig {
   clientId:            string;
@@ -32,7 +32,7 @@ export class AuthService {
    * and allow the app to continue loading (public pages will work).
    */
   initialize(): Observable<void> {
-    return this.api.getConfig<OAuthBackendConfig>('/api/oauth/config').pipe(
+    return this.api.getConfig<OAuthBackendConfig>('/api/auth/config').pipe(
 
       tap((cfg: OAuthBackendConfig) => {
         // Validate required fields

@@ -1,19 +1,23 @@
-package api
+package auth
 
 import (
 	"fmt"
 	"strings"
 	"net/http"
+
+	"github.com/gczuczy/dw-stellar-density-analyzer/pkg/http/wrappers"
 )
 
 type Config struct {
 	Issuer string `json:"issuer"`
 	ClientID string `json:"clientId"`
 	RedirectURI string `json:"redirectUri"`
+	AuthURL string `json:"authUrl"`
+	TokenURL string `json:"tokenUrl"`
 	Scope string `json:"scope"`
 }
 
-func configHandler(w http.ResponseWriter, r *http.Request) {
+func configHandler(r *http.Request) (any, wrappers.Error) {
 
 	var host string
 	if r.Host == "localhost" || r.Host == "127.0.0.1" ||
@@ -24,11 +28,12 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
 		host = fmt.Sprintf("https://%s", r.Host)
 	}
 
-	resp := success(Config{
+	return Config{
 		Issuer: oauth2config.Issuer,
 		ClientID: oauth2config.ClientID,
 		RedirectURI: fmt.Sprintf("%s/api/auth/callback", host),
 		Scope: scopes,
-	})
-	returnJson(resp, 200, w)
+		AuthURL: oauth2config.AuthorizeURL,
+		TokenURL: oauth2config.TokenURL,
+	}, nil
 }
