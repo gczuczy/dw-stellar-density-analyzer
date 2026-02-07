@@ -4,13 +4,14 @@
     "allow": [
       "Bash(npm run lint)",
       "Bash(npm run test *)",
-			"Bash(gmake build)"
-			"Bash(gmake -C frontend/ build)"
+			"Bash(gmake build)",
+			"Bash(gmake -C frontend/ build)",
+			"Bash(gmake -C /home/gczuczy/github.com/gczuczy/dw-stellar-density-analyzer/frontend/ build)"
     ],
     "deny": [
     ]
   },
   "env": {
-    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
   }
 }
